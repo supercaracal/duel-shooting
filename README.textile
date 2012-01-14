@@ -1,0 +1,1 @@
+<p>This is a shooting game. It is operated in a browser.</p>
