@@ -1,9 +1,9 @@
 This is a shooting game. It is operated in a browser.
 
 |*Action|*Type key|
-|Move right|Å®|
-|Move left|Å©|
-|Attack1|Å™|
+|Move right|Cursor Right|
+|Move left|Cursor Left|
+|Attack1|Cursor Up|
 |Attack2|F|
 |Attack3|M|
 
