@@ -1,3 +1,5 @@
+"Duel Shooting":http://9leap.net/games/1019/
+
 This is a shooting game. It is operated in a browser.
 
 |*Action|*Type Key|
@@ -7,8 +9,6 @@ This is a shooting game. It is operated in a browser.
 |Attack1|Cursor Up|
 |Attack2|F|
 |Attack3|M|
-
-"Duel Shooting":http://9leap.net/games/1019/
 
 !https://github.com/supercaracal/duelshooting/raw/master/screenshot.jpg!
 
