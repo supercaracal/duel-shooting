@@ -314,14 +314,14 @@ var DuelShooting = Class.create({
         var timerId = window.setInterval(function () {
             var opacity = title.getOpacity();
             if (opacity >= 1.0) {
-                clearInterval(timerId);
+                window.clearInterval(timerId);
                 setTimeout(function () {
                     callback();
                     title.remove();
                     var timerId = window.setInterval(function () {
                         var opacity = modal.getOpacity();
                         if (opacity <= 0.0) {
-                            clearInterval(timerId);
+                            window.clearInterval(timerId);
                             modal.remove();
                         }
                         modal.setOpacity(opacity - 0.1);
@@ -983,7 +983,7 @@ var DuelShooting = Class.create({
      */
     stop: function () {
         this.se.each((function (x) { this.seHandler.stop(x.value); }).bind(this));
-        clearInterval(this.timerId);
-        clearInterval(this.timeCountTimerId);
+        window.clearInterval(this.timerId);
+        window.clearInterval(this.timeCountTimerId);
     }
 });
