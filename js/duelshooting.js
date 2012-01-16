@@ -186,12 +186,6 @@ var DuelShooting = Class.create({
 
     /**
      *
-     * @type {Object}
-     */
-    seHandler: null,
-
-    /**
-     *
      * @type {boolean}
      */
     isShipPinch: null,
@@ -209,7 +203,7 @@ var DuelShooting = Class.create({
      */
     initialize: function () {
         this.preLoad();
-        this.setSeHandler();
+        this.addAudioMethod();
         this.hasTouchEvent = (function () { return new Element('div', {ontouchstart: 'return;'}).ontouchstart == 'function'; }());
         this.setClientHeight();
         this.setClientWidth();
@@ -261,17 +255,18 @@ var DuelShooting = Class.create({
      *
      * @private
      */
-    setSeHandler: function () {
-        this.seHandler = {};
-        this.seHandler.stop = function (audio) {
-            audio.pause();
-            audio.currentTime = 0;
-        };
-        this.seHandler.replay = function (audio) {
-            audio.pause();
-            audio.currentTime = 0;
-            audio.play();
-        };
+    addAudioMethod: function () {
+        this.se.each(function (x) {
+            x.value.stop = (function (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }).methodize();
+            x.value.replay = (function (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+                audio.play();
+            }).methodize();
+        });
     },
 
     /**
@@ -492,7 +487,7 @@ var DuelShooting = Class.create({
         obj.setStyle({top: this.clientHeight - 120 + 'px', left: elm.getStyle('left').replace('px', '') - 0 + 30 + 'px'});
         Element.insert(document.body, obj);
         this.shipBullets.push(obj);
-        this.seHandler.replay(this.se.get('funnelAttack'));
+        this.se.get('funnelAttack').replay();
     },
 
     /**
@@ -523,7 +518,7 @@ var DuelShooting = Class.create({
         obj.setStyle({top: this.clientHeight - 90 + 'px', left: this.ship.getStyle('left').replace('px', '') - 0 + 30 + 'px'});
         Element.insert(document.body, obj);
         this.shipFunnels.push(obj);
-        this.seHandler.replay(this.se.get('funnelMove'));
+        this.se.get('funnelMove').replay();
     },
 
     /**
@@ -721,7 +716,7 @@ var DuelShooting = Class.create({
         var sign = (move < 0) ? -1 : 1;
         var inc = 10;
         this.addEnemyAfterimage([enemyLeft, enemyLeft + (inc * 3 * sign), enemyLeft + (inc * 6 * sign)]);
-        this.seHandler.replay(this.se.get('newtype'));
+        this.se.get('newtype').replay();
     },
 
     /**
@@ -730,7 +725,7 @@ var DuelShooting = Class.create({
      */
     hitEnemy: function () {
         this.enemy.down(0).update(--this.enemyHP);
-        this.seHandler.replay(this.se.get('hit'));
+        this.se.get('hit').replay();
         if (this.enemyHP < 1) {
             this.stop();
             this.enemy.down(0).update(0);
@@ -892,7 +887,7 @@ var DuelShooting = Class.create({
      */
     attack: function () {
         this.addShipBullet();
-        this.seHandler.replay(this.se.get('attack'));
+        this.se.get('attack').replay();
     },
 
     /**
@@ -982,7 +977,7 @@ var DuelShooting = Class.create({
      * @private
      */
     stop: function () {
-        this.se.each((function (x) { this.seHandler.stop(x.value); }).bind(this));
+        this.se.each((function (x) { x.value.stop(); }).bind(this));
         window.clearInterval(this.timerId);
         window.clearInterval(this.timeCountTimerId);
     }
