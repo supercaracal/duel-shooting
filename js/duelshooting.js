@@ -1020,7 +1020,7 @@ var DuelShooting = Class.create({
             --this.megaCannonHeight;
         }
         if (Math.floor(Math.random() * 100) % 50 === 0) {
-            this.enemyBulletCount += Math.floor(Math.random() * 100) % 5;
+            this.enemyBulletCount += Math.floor(Math.random() * 100) % 9;
         }
         if (this.enemyBulletCount > 0) {
             this.addEnemyBullet(this.enemy, 60);
@@ -1031,7 +1031,7 @@ var DuelShooting = Class.create({
         }
         if (0 < this.enemyFunnels.length) {
             this.enemyFunnels.each((function (x) {
-                if (Math.floor(Math.random() * 100) % 13 === 0 && Math.floor(Math.random() * 100) % 5 === 0) {
+                if (Math.floor(Math.random() * 100) % 13 === 0 && Math.floor(Math.random() * 100) % 3 === 0) {
                     this.addEnemyBullet(x.elm, x.elm.getStyle('top').replace('px', '') - 0);
                 }
             }).bind(this));
