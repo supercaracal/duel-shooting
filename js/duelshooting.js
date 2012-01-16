@@ -258,10 +258,12 @@ var DuelShooting = Class.create({
     addAudioMethod: function () {
         this.se.each(function (x) {
             x.value.stop = (function (audio) {
+                if (!('pause' in audio)) return;
                 audio.pause();
                 audio.currentTime = 0;
             }).methodize();
             x.value.replay = (function (audio) {
+                if (!('pause' in audio)) return;
                 audio.pause();
                 audio.currentTime = 0;
                 audio.play();
@@ -278,7 +280,7 @@ var DuelShooting = Class.create({
     animateOpening: function (text, callback) {
         var modal  = new Element('div').setStyle({
             display: 'block',
-            position: 'fixed',
+            position: 'absolute',
             zIndex: this.Z_INDEX_BASE + 100,
             top: '0px',
             left: '0px',
@@ -291,7 +293,7 @@ var DuelShooting = Class.create({
         var title = new Element('div').setStyle({
             display: 'none',
             opacity: '0.0',
-            position: 'fixed',
+            position: 'absolute',
             zIndex: this.Z_INDEX_BASE + 101,
             fontSize: '36px',
             color: '#FFFFFF',
@@ -744,12 +746,12 @@ var DuelShooting = Class.create({
             this.stop();
             this.ship.down(1).update(0);
             this.shipHP = 0;
-            this.se.get('lose').play();
+            this.se.get('lose').replay();
             return;
         }
         if (!this.isShipPinch && this.shipHP < 40) {
             this.isShipPinch = true;
-            this.se.get('shipPinch').play();
+            this.se.get('shipPinch').replay();
         }
     },
 
@@ -914,7 +916,7 @@ var DuelShooting = Class.create({
         this.addShipMegaCannonBullet();
         this.megaCannonWaitCount = this.MEGA_CANNON_WAIT;
         this.megaCannonHeight = this.MEGA_CANNON_HEIGHT;
-        this.se.get('mega').play();
+        this.se.get('mega').replay();
     },
 
     /**
