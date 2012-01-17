@@ -1032,7 +1032,7 @@ var DuelShooting = Class.create({
         if (0 < this.enemyFunnels.length) {
             this.enemyFunnels.each((function (x) {
                 if (Math.floor(Math.random() * 100) % 13 === 0 && Math.floor(Math.random() * 100) % 3 === 0) {
-                    this.addEnemyBullet(x.elm, x.elm.getStyle('top').replace('px', '') - 0);
+                    this.addEnemyBullet(x.elm, x.elm.getStyle('top').replace('px', '') - 0 + 30);
                 }
             }).bind(this));
         }
