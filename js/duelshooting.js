@@ -263,18 +263,18 @@ var DuelShooting = Class.create({
      * @private
      */
     addAudioMethod: function () {
-        this.se.each(function (x) {
-            x.value.stop = (function (audio) {
+        Element.addMethods(['audio'], {
+            stop: function (audio) {
                 if (!('pause' in audio)) return;
                 audio.pause();
                 audio.currentTime = 0;
-            }).methodize();
-            x.value.replay = (function (audio) {
+            },
+            replay: function (audio) {
                 if (!('pause' in audio)) return;
                 audio.pause();
                 audio.currentTime = 0;
                 audio.play();
-            }).methodize();
+            }
         });
     },
 
@@ -586,13 +586,14 @@ var DuelShooting = Class.create({
      */
     moveShipBullets: function () {
         var enemyLeft = this.enemy.getStyle('left').replace('px', '') - 0;
-        for (var i = 0, len = this.shipBullets.length; i < len; i++) {
-            var elm = this.shipBullets[i];
+        var elm, top, left;
+        for (var i = 0, len = this.shipBullets.length; i < len; ++i) {
+            elm = this.shipBullets[i];
             if (!elm) {
                 continue;
             }
-            var top = elm.getStyle('top').replace('px', '') - 0;
-            var left = elm.getStyle('left').replace('px', '') - 0;
+            top = elm.getStyle('top').replace('px', '') - 0;
+            left = elm.getStyle('left').replace('px', '') - 0;
             if ((enemyLeft - 25 < left) && (left <= enemyLeft + 5) && (top - 10 < 30)) {
                 this.shipBullets[i] = null;
                 elm.remove();
@@ -628,13 +629,14 @@ var DuelShooting = Class.create({
      */
     moveEnemyBullets: function () {
         var shipLeft = this.ship.getStyle('left').replace('px', '') - 0;
-        for (var i = 0, len = this.enemyBullets.length; i < len; i++) {
-            var elm = this.enemyBullets[i];
+        var elm, top, left;
+        for (var i = 0, len = this.enemyBullets.length; i < len; ++i) {
+            elm = this.enemyBullets[i];
             if (!elm) {
                 continue;
             }
-            var top = elm.getStyle('top').replace('px', '') - 0;
-            var left = elm.getStyle('left').replace('px', '') - 0;
+            top = elm.getStyle('top').replace('px', '') - 0;
+            left = elm.getStyle('left').replace('px', '') - 0;
             if ((shipLeft - 25 < left) && (left <= shipLeft + 5) && ((top + 10) > (this.clientHeight - 30))) {
                 this.enemyBullets[i] = null;
                 elm.remove();
@@ -678,13 +680,14 @@ var DuelShooting = Class.create({
      */
     moveShipFunnels: function () {
         var enemyLeft = this.enemy.getStyle('left').replace('px', '') - 0;
-        for (var i = 0, len = this.shipFunnels.length; i < len; i++) {
-            var elm = this.shipFunnels[i];
+        var elm, left, move;
+        for (var i = 0, len = this.shipFunnels.length; i < len; ++i) {
+            elm = this.shipFunnels[i];
             if (!elm) {
                 continue;
             }
-            var left = elm.getStyle('left').replace('px', '') - 0;
-            var move = (enemyLeft - left) > 0 ? 10 : -10;
+            left = elm.getStyle('left').replace('px', '') - 0;
+            move = (enemyLeft - left) > 0 ? 10 : -10;
             if (Math.abs(enemyLeft - left + move) < 30) {
                 this.addShipFunnelBullet(elm);
                 this.shipFunnels[i] = null;
@@ -715,13 +718,14 @@ var DuelShooting = Class.create({
      */
     moveComeBackShipFunnels: function () {
         var shipCenterLeft = this.ship.getStyle('left').replace('px', '') - 0 + 30;
-        for (var i = 0, len = this.comeBackShipFunnels.length; i < len; i++) {
-            var elm = this.comeBackShipFunnels[i];
+        var elm, left, move;
+        for (var i = 0, len = this.comeBackShipFunnels.length; i < len; ++i) {
+            elm = this.comeBackShipFunnels[i];
             if (!elm) {
                 continue;
             }
-            var left = elm.getStyle('left').replace('px', '') - 0;
-            var move = (shipCenterLeft - left) > 0 ? 10 : -10;
+            left = elm.getStyle('left').replace('px', '') - 0;
+            move = (shipCenterLeft - left) > 0 ? 10 : -10;
             if (Math.abs(shipCenterLeft - left + move) < 30) {
                 this.comeBackShipFunnels[i] = null;
                 elm.remove();
@@ -744,20 +748,21 @@ var DuelShooting = Class.create({
         var searchSectorX = 90;
         var searchSectorY = 30;
         var isLeft = false;
-        for (var i = 0, len = this.shipBullets.length; i < len; i++) {
-            var elm = this.shipBullets[i];
+        var elm, top, left, seed;
+        for (var i = 0, len = this.shipBullets.length; i < len; ++i) {
+            elm = this.shipBullets[i];
             if (!elm) {
                 continue;
             }
-            var top = elm.getStyle('top').replace('px', '') - 0;
-            var left = elm.getStyle('left').replace('px', '') - 0;
+            top = elm.getStyle('top').replace('px', '') - 0;
+            left = elm.getStyle('left').replace('px', '') - 0;
             if (enemyLeft - searchSectorY <= left && (left <= enemyLeft + moveMax) && top < searchSectorX) {
                 if (enemyLeft - moveMax < 0) {
                     move = moveMax;
                 } else if (enemyLeft + moveMax > this.clientWidth - 90) {
                     move = -moveMax;
                 } else {
-                    var seed = Math.floor(Math.random() * 100);
+                    seed = Math.floor(Math.random() * 100);
                     move = (seed % 2) ? moveMax : -moveMax;
                 }
             }
