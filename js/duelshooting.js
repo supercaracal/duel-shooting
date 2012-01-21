@@ -673,6 +673,7 @@ var DuelShooting = Class.create({
                 elm.remove();
                 iFieldHeight = this.enemyIField.getHeight();
                 iFieldHeight -= 2;
+                iFieldHeight = iFieldHeight < 0 ? 0 : iFieldHeight;
                 this.enemyIField.setStyle({height: iFieldHeight + 'px'});
                 this.enemyIField.setTop(this.enemyIField.getTop() + 1);
                 continue;
