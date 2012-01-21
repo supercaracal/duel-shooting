@@ -660,7 +660,7 @@ var DuelShooting = Class.create({
      */
     moveShipBullets: function () {
         var enemyLeft = this.enemy.getLeft();
-        var elm, top, left;
+        var elm, top, left, iFieldHeight;
         for (var i = 0, len = this.shipBullets.length; i < len; ++i) {
             elm = this.shipBullets[i];
             if (!elm) {
@@ -671,6 +671,10 @@ var DuelShooting = Class.create({
             if (this.isActiveEnemyIField && top - 10 < 80 && enemyLeft - 25 < left && left < enemyLeft + 95) {
                 this.shipBullets[i] = null;
                 elm.remove();
+                iFieldHeight = this.enemyIField.getHeight();
+                iFieldHeight -= 2;
+                this.enemyIField.setStyle({height: iFieldHeight + 'px'});
+                this.enemyIField.setTop(this.enemyIField.getTop() + 1);
                 continue;
             }
             if ((enemyLeft - 25 < left) && (left <= enemyLeft + 5) && (top - 10 < 30)) {
@@ -1197,12 +1201,18 @@ var DuelShooting = Class.create({
                 }
             }).bind(this));
         }
-        if ((this.enemyHP > 100 ? 100 : this.enemyHP).isTiming() && (2).isTiming()) {
-            this.isActiveEnemyIField = !this.isActiveEnemyIField;
-            this.isActiveEnemyIField ? this.enemyIField.show() : this.enemyIField.hide();
+        if (!this.isActiveEnemyIField && (this.enemyHP > 100 ? 100 : this.enemyHP).isTiming() && (9).isTiming()) {
+            this.enemyIField.setStyle({height: 20 + 'px'});
+            this.enemyIField.setTop(75);
+            this.isActiveEnemyIField = true;
+            this.enemyIField.show();
         }
         if (this.isActiveEnemyIField) {
             this.setEnemyIFieldColor();
+        }
+        if (this.enemyIField.getHeight() < 2) {
+            this.enemyIField.hide();
+            this.isActiveEnemyIField = false;
         }
         this.rotateEnemyIFieldFunnels();
     },
