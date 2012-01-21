@@ -194,12 +194,6 @@ var DuelShooting = Class.create({
      *
      * @type {boolean}
      */
-    isShipPinch: null,
-
-    /**
-     *
-     * @type {boolean}
-     */
     isEnemyMoveRight: null,
 
     /**
@@ -210,6 +204,8 @@ var DuelShooting = Class.create({
     initialize: function () {
         this.preLoad();
         this.addAudioMethod();
+        this.addDivMethod();
+        Number.prototype.isTiming = (function (num) { return Math.floor(Math.random() * 100) % num === 0; }).methodize();
         this.hasTouchEvent = (function () { return new Element('div', {ontouchstart: 'return;'}).ontouchstart == 'function'; }());
         this.setClientHeight();
         this.setClientWidth();
@@ -228,7 +224,6 @@ var DuelShooting = Class.create({
         this.megaCannonHeight = 0;
         this.enemyBulletCount = 0;
         this.comeBackShipFunnels = [];
-        this.isShipPinch = false;
         this.enemyTurn = true;
         Event.observe(window, 'resize', this.redeploy.bindAsEventListener(this));
         this.animateOpening(
@@ -253,8 +248,7 @@ var DuelShooting = Class.create({
             newtype: new Element('audio', {src: './se/newtype.wav'}),
             lose: new Element('audio', {src: './se/lose.wav'}),
             funnelMove: new Element('audio', {src: './se/funnel1.wav'}),
-            funnelAttack: new Element('audio', {src: './se/funnel2.wav'}),
-            shipPinch: new Element('audio', {src: './se/ship_pinch.mp3', loop: true})
+            funnelAttack: new Element('audio', {src: './se/funnel2.wav'})
         });
     },
 
@@ -263,7 +257,7 @@ var DuelShooting = Class.create({
      * @private
      */
     addAudioMethod: function () {
-        Element.addMethods(['audio'], {
+        Element.addMethods('audio', {
             stop: function (audio) {
                 if (!('pause' in audio)) return;
                 audio.pause();
@@ -274,6 +268,34 @@ var DuelShooting = Class.create({
                 audio.pause();
                 audio.currentTime = 0;
                 audio.play();
+            }
+        });
+    },
+
+    /**
+     *
+     * @private
+     */
+    addDivMethod: function () {
+        Element.addMethods('div', {
+            getTop: function (div) {
+                return div.getStyle('top').replace('px', '') - 0;
+            },
+            getLeft: function (div) {
+                return div.getStyle('left').replace('px', '') - 0;
+            },
+            getPos: function (div) {
+                return {top: div.getStyle('top').replace('px', '') - 0, left: div.getStyle('left').replace('px', '') - 0};
+            },
+            setTop: function (div, px) {
+                div.setStyle({top: px + 'px'});
+            },
+            setLeft: function (div, px) {
+                div.setStyle({left: px + 'px'});
+            },
+            setPos: function (div, pxs) {
+                if (pxs['top'] !== undefined) div.setStyle({top: pxs.top + 'px'});
+                if (pxs['left'] !== undefined) div.setStyle({left: pxs.left + 'px'});
             }
         });
     },
@@ -294,12 +316,10 @@ var DuelShooting = Class.create({
             backgroundColor: '#111111',
             height: this.clientHeight + 'px',
             width: this.clientWidth + 'px',
-            opacity: '1.0',
-            filter: 'progid:DXImageTransform.Microsoft.Alpha(opacity=100)'
         });
+        modal.setOpacity(1.0);
         var title = new Element('div').setStyle({
             display: 'none',
-            opacity: '0.0',
             position: 'absolute',
             zIndex: this.Z_INDEX_BASE + 101,
             fontSize: '36px',
@@ -307,6 +327,7 @@ var DuelShooting = Class.create({
             top: '0px',
             left: '0px'
         }).update(text);
+        title.setOpacity(0.0);
         modal.insert(title);
         Element.insert(document.body, modal);
         var dim = title.getDimensions();
@@ -368,9 +389,8 @@ var DuelShooting = Class.create({
             backgroundColor: '#333333',
             height: this.clientHeight + 'px',
             width: this.clientWidth + 'px',
-            opacity: '0.8',
-            filter: 'progid:DXImageTransform.Microsoft.Alpha(opacity=80)'
         });
+        this.modal.setOpacity(0.8);
     },
 
     /**
@@ -482,7 +502,7 @@ var DuelShooting = Class.create({
      */
     addShipBullet: function () {
         var obj = this.getBullet();
-        obj.setStyle({top: this.clientHeight - 90 + 'px', left: this.ship.getStyle('left').replace('px', '') - 0 + 30 + 'px'});
+        obj.setPos({top: this.clientHeight - 90, left: this.ship.getLeft() + 30});
         Element.insert(document.body, obj);
         this.shipBullets.push(obj);
     },
@@ -490,12 +510,13 @@ var DuelShooting = Class.create({
     /**
      *
      * @param {Element} elm
-     * @param {number} adjust
+     * @param {number} top
+     * @param {number} left
      * @private
      */
-    addEnemyBullet: function (elm, top) {
+    addEnemyBullet: function (elm, top, left) {
         var obj = this.getHomingBullet();
-        obj.setStyle({top: top + 'px', left: elm.getStyle('left').replace('px', '') - 0 + 30 + 'px'});
+        obj.setPos({top: top, left: left});
         Element.insert(document.body, obj);
         this.enemyBullets.push(obj);
     },
@@ -506,7 +527,7 @@ var DuelShooting = Class.create({
      */
     addEnemyFunnel: function () {
         var obj = this.getEnemyFunnel();
-        obj.setStyle({top: '60px', left: this.enemy.getStyle('left').replace('px', '') - 0 + 30 + 'px'});
+        obj.setPos({top: 60, left: this.enemy.getLeft() + 30});
         Element.insert(document.body, obj);
         this.enemyFunnels.push({
             elm: obj,
@@ -514,8 +535,8 @@ var DuelShooting = Class.create({
             theta: 0,
             speed: 3,
             isClockwise: true,
-            baseX: obj.getStyle('top').replace('px', '') - 0,
-            baseY: obj.getStyle('left').replace('px', '') - 0
+            baseX: obj.getTop(),
+            baseY: obj.getLeft()
         });
     },
 
@@ -526,7 +547,7 @@ var DuelShooting = Class.create({
      */
     addShipFunnelBullet: function (elm) {
         var obj = this.getBullet();
-        obj.setStyle({top: this.clientHeight - 120 + 'px', left: elm.getStyle('left').replace('px', '') - 0 + 30 + 'px'});
+        obj.setPos({top: this.clientHeight - 120, left: elm.getLeft() + 30});
         Element.insert(document.body, obj);
         this.shipBullets.push(obj);
         this.se.get('funnelAttack').replay();
@@ -540,9 +561,9 @@ var DuelShooting = Class.create({
         var objL = this.getBullet();
         var objM = this.getBullet();
         var objR = this.getBullet();
-        objL.setStyle({top: this.clientHeight - 90 + 'px', left: this.ship.getStyle('left').replace('px', '') - 0 + 'px'});
-        objM.setStyle({top: this.clientHeight - 90 + 'px', left: this.ship.getStyle('left').replace('px', '') - 0 + 30 + 'px'});
-        objR.setStyle({top: this.clientHeight - 90 + 'px', left: this.ship.getStyle('left').replace('px', '') - 0 + 60 + 'px'});
+        objL.setPos({top: this.clientHeight - 90, left: this.ship.getLeft()});
+        objM.setPos({top: this.clientHeight - 90, left: this.ship.getLeft() + 30});
+        objR.setPos({top: this.clientHeight - 90, left: this.ship.getLeft() + 60});
         Element.insert(document.body, objL);
         Element.insert(document.body, objM);
         Element.insert(document.body, objR);
@@ -557,7 +578,7 @@ var DuelShooting = Class.create({
      */
     addShipFunnel: function () {
         var obj = this.getShipFunnel();
-        obj.setStyle({top: this.clientHeight - 90 + 'px', left: this.ship.getStyle('left').replace('px', '') - 0 + 30 + 'px'});
+        obj.setPos({top: this.clientHeight - 90, left: this.ship.getLeft() + 30});
         Element.insert(document.body, obj);
         this.shipFunnels.push(obj);
         this.se.get('funnelMove').replay();
@@ -574,7 +595,7 @@ var DuelShooting = Class.create({
         }
         lefts.each((function (left) {
             var afterimage = this.getEnemyAfterimage();
-            afterimage.setStyle({top: this.enemy.getStyle('top'), left: left + 'px'});
+            afterimage.setPos({top: this.enemy.getTop(), left: left});
             Element.insert(document.body, afterimage);
             (function () { afterimage.remove(); }).delay(0.3);
         }).bind(this));
@@ -585,15 +606,15 @@ var DuelShooting = Class.create({
      * @private
      */
     moveShipBullets: function () {
-        var enemyLeft = this.enemy.getStyle('left').replace('px', '') - 0;
+        var enemyLeft = this.enemy.getLeft();
         var elm, top, left;
         for (var i = 0, len = this.shipBullets.length; i < len; ++i) {
             elm = this.shipBullets[i];
             if (!elm) {
                 continue;
             }
-            top = elm.getStyle('top').replace('px', '') - 0;
-            left = elm.getStyle('left').replace('px', '') - 0;
+            top = elm.getTop();
+            left = elm.getLeft();
             if ((enemyLeft - 25 < left) && (left <= enemyLeft + 5) && (top - 10 < 30)) {
                 this.shipBullets[i] = null;
                 elm.remove();
@@ -618,7 +639,7 @@ var DuelShooting = Class.create({
                 continue;
 
             }
-            elm.setStyle({top: top - 10 + 'px'});
+            elm.setTop(top - 10);
         }
         this.shipBullets = this.shipBullets.compact();
     },
@@ -628,15 +649,15 @@ var DuelShooting = Class.create({
      * @private
      */
     moveEnemyBullets: function () {
-        var shipLeft = this.ship.getStyle('left').replace('px', '') - 0;
+        var shipLeft = this.ship.getLeft();
         var elm, top, left;
         for (var i = 0, len = this.enemyBullets.length; i < len; ++i) {
             elm = this.enemyBullets[i];
             if (!elm) {
                 continue;
             }
-            top = elm.getStyle('top').replace('px', '') - 0;
-            left = elm.getStyle('left').replace('px', '') - 0;
+            top = elm.getTop();
+            left = elm.getLeft();
             if ((shipLeft - 25 < left) && (left <= shipLeft + 5) && ((top + 10) > (this.clientHeight - 30))) {
                 this.enemyBullets[i] = null;
                 elm.remove();
@@ -669,7 +690,7 @@ var DuelShooting = Class.create({
             } else {
                 distance = 0;
             }
-            elm.setStyle({top: top + 10 + 'px', left: left + distance + 'px'});
+            elm.setPos({top: top + 10, left: left + distance});
         }
         this.enemyBullets = this.enemyBullets.compact();
     },
@@ -679,22 +700,21 @@ var DuelShooting = Class.create({
      * @private
      */
     moveShipFunnels: function () {
-        var enemyLeft = this.enemy.getStyle('left').replace('px', '') - 0;
-        var elm, left, move;
+        var enemyCenterLeft = this.enemy.getLeft() + 30;
+        var elm, left;
         for (var i = 0, len = this.shipFunnels.length; i < len; ++i) {
             elm = this.shipFunnels[i];
             if (!elm) {
                 continue;
             }
-            left = elm.getStyle('left').replace('px', '') - 0;
-            move = (enemyLeft - left) > 0 ? 10 : -10;
-            if (Math.abs(enemyLeft - left + move) < 30) {
+            left = elm.getLeft();
+            if (Math.abs(enemyCenterLeft - left) < 30) {
                 this.addShipFunnelBullet(elm);
                 this.shipFunnels[i] = null;
                 this.comeBackShipFunnels.push(elm);
                 continue;
             }
-            elm.setStyle({left: left + move + 'px'});
+            elm.setLeft(left + ((enemyCenterLeft - left) > 0 ? 10 : -10));
         }
         this.shipFunnels = this.shipFunnels.compact();
     },
@@ -703,36 +723,22 @@ var DuelShooting = Class.create({
      *
      * @private
      */
-    moveEnemyFunnels: function () {
-        this.enemyFunnels.each((function (x) {
-            if (x.move === undefined) {
-                x.move = this.moveCircle.methodize();
-            }
-            x.move();
-        }).bind(this));
-    },
-
-    /**
-     *
-     * @private
-     */
     moveComeBackShipFunnels: function () {
-        var shipCenterLeft = this.ship.getStyle('left').replace('px', '') - 0 + 30;
-        var elm, left, move;
+        var shipCenterLeft = this.ship.getLeft() + 30;
+        var elm, left;
         for (var i = 0, len = this.comeBackShipFunnels.length; i < len; ++i) {
             elm = this.comeBackShipFunnels[i];
             if (!elm) {
                 continue;
             }
-            left = elm.getStyle('left').replace('px', '') - 0;
-            move = (shipCenterLeft - left) > 0 ? 10 : -10;
-            if (Math.abs(shipCenterLeft - left + move) < 30) {
+            left = elm.getLeft();
+            if (Math.abs(shipCenterLeft - left) < 30) {
                 this.comeBackShipFunnels[i] = null;
                 elm.remove();
                 ++this.funnelCount;
                 continue;
             }
-            elm.setStyle({left: left + move + 'px'});
+            elm.setLeft(left + ((shipCenterLeft - left) > 0 ? 10 : -10));
         }
         this.comeBackShipFunnels = this.comeBackShipFunnels.compact();
     },
@@ -741,36 +747,46 @@ var DuelShooting = Class.create({
      *
      * @private
      */
+    moveEnemyFunnels: function () {
+        this.enemyFunnels.each((function (x) {
+            if (x.move === undefined) x.move = this.moveCircle.methodize();
+            x.move();
+        }).bind(this));
+    },
+
+    /**
+     *
+     * @private
+     */
     moveEnemy: function () {
-        var enemyLeft = this.enemy.getStyle('left').replace('px', '') - 0;
+        var enemyLeft = this.enemy.getLeft();
         var move = 0;
         var moveMax = 90;
         var searchSectorX = 90;
         var searchSectorY = 30;
         var isLeft = false;
-        var elm, top, left, seed;
+        var elm, top, left;
         for (var i = 0, len = this.shipBullets.length; i < len; ++i) {
             elm = this.shipBullets[i];
             if (!elm) {
                 continue;
             }
-            top = elm.getStyle('top').replace('px', '') - 0;
-            left = elm.getStyle('left').replace('px', '') - 0;
+            top = elm.getTop();
+            left = elm.getLeft();
             if (enemyLeft - searchSectorY <= left && (left <= enemyLeft + moveMax) && top < searchSectorX) {
                 if (enemyLeft - moveMax < 0) {
                     move = moveMax;
                 } else if (enemyLeft + moveMax > this.clientWidth - 90) {
                     move = -moveMax;
                 } else {
-                    seed = Math.floor(Math.random() * 100);
-                    move = (seed % 2) ? moveMax : -moveMax;
+                    move = (2).isTiming() ? moveMax : -moveMax;
                 }
             }
         }
-        this.enemy.setStyle({left: enemyLeft + move + 'px'});
+        this.enemy.setLeft(enemyLeft + move);
         if (move === 0) {
             this.isEnemyMoveRight = enemyLeft - 3 < 0 ? true : ((this.clientWidth - 90 < enemyLeft + 3) ? false : this.isEnemyMoveRight);
-            this.enemy.setStyle({left: enemyLeft + (this.isEnemyMoveRight ? 3 : -3) + 'px'});
+            this.enemy.setLeft(enemyLeft + (this.isEnemyMoveRight ? 3 : -3));
             return;
         }
         var sign = (move < 0) ? -1 : 1;
@@ -787,7 +803,7 @@ var DuelShooting = Class.create({
     moveCircle: function (obj) {
         var y = obj.baseY + Math.sin(Math.PI / 180 * obj.theta) * obj.r;
         var x = obj.baseX + obj.r - Math.cos(Math.PI / 180 * obj.theta) * obj.r;
-        obj.elm.setStyle({top: x + 'px', left: y + 'px'});
+        obj.elm.setPos({top: x, left: y});
         obj.theta += obj.isClockwise ? obj.speed : -obj.speed;
         if (obj.theta < 0 || 360 < obj.theta ) {
             obj.theta = obj.isClockwise ? 0 : 360;
@@ -822,10 +838,6 @@ var DuelShooting = Class.create({
             this.se.get('lose').replay();
             return;
         }
-        if (!this.isShipPinch && this.shipHP < 40) {
-            this.isShipPinch = true;
-            this.se.get('shipPinch').replay();
-        }
     },
 
     /**
@@ -850,8 +862,8 @@ var DuelShooting = Class.create({
             this.setClientHeight();
             this.setClientWidth();
             this.modal.setStyle({height: this.clientHeight + 'px', width: this.clientWidth + 'px'});
-            this.enemy.setStyle({top: '0px', left: '0px'});
-            this.ship.setStyle({top: this.clientHeight - 60 + 'px', left: this.clientWidth - 90 + 'px'});
+            this.enemy.setPos({top: 0, left: 0});
+            this.ship.setPos({top: this.clientHeight - 60, left: this.clientWidth - 90});
         }).bind(this).defer();
     },
 
@@ -931,10 +943,10 @@ var DuelShooting = Class.create({
      * @private
      */
     stepRight: function () {
-        var left = this.ship.getStyle('left').replace('px', '') - 0;
+        var left = this.ship.getLeft();
         var max = this.clientWidth - 90;
         if (left + 10 <= max) {
-            this.ship.setStyle({left: left + 10 + 'px'});
+            this.ship.setLeft(left + 10);
         }
     },
 
@@ -943,10 +955,10 @@ var DuelShooting = Class.create({
      * @private
      */
     stepLeft: function () {
-        var left = this.ship.getStyle('left').replace('px', '') - 0;
+        var left = this.ship.getLeft();
         var min = 0;
         if (min <= left - 10) {
-            this.ship.setStyle({left: left - 10 + 'px'});
+            this.ship.setLeft(left - 10);
         }
     },
 
@@ -954,7 +966,7 @@ var DuelShooting = Class.create({
      *
      * @private
      */
-    wait: function () {},
+    wait: Prototype.emptyFunction,
 
     /**
      *
@@ -1011,6 +1023,17 @@ var DuelShooting = Class.create({
         this.moveShipBullets();
         this.moveShipFunnels();
         this.moveComeBackShipFunnels();
+        this.battle();
+        this.moveEnemy();
+        this.moveEnemyBullets();
+        this.moveEnemyFunnels();
+    },
+
+    /**
+     *
+     * @private
+     */
+    battle: function () {
         if (this.nextCommand && (this.nextCommand in this)) {
             (this[this.nextCommand].bind(this))();
             if (this.nextCommand !== 'stepRight' && this.nextCommand !== 'stepLeft') {
@@ -1024,26 +1047,25 @@ var DuelShooting = Class.create({
             if (this.megaCannonHeight % 3 === 0) this.addShipMegaCannonBullet();
             --this.megaCannonHeight;
         }
-        if (Math.floor(Math.random() * 100) % 50 === 0) {
+        if ((50).isTiming()) {
             this.enemyBulletCount += Math.floor(Math.random() * 100) % 9;
         }
         if (this.enemyBulletCount > 0) {
-            this.addEnemyBullet(this.enemy, 60);
+            this.addEnemyBullet(this.enemy, 60, this.enemy.getLeft() + 30);
             --this.enemyBulletCount;
         }
-        if (this.enemyHP < 50 && Math.floor(Math.random() * 100) % 99 === 0 && Math.floor(Math.random() * 100) % 9 === 0 && this.enemyFunnels.length < 2) {
+        if (this.enemyHP < 50 && (99).isTiming() && (9).isTiming() && this.enemyFunnels.length < 2) {
             this.addEnemyFunnel();
         }
         if (0 < this.enemyFunnels.length) {
             this.enemyFunnels.each((function (x) {
-                if (Math.floor(Math.random() * 100) % 13 === 0 && Math.floor(Math.random() * 100) % 3 === 0) {
-                    this.addEnemyBullet(x.elm, x.elm.getStyle('top').replace('px', '') - 0 + 30);
+                if ((13).isTiming() && (3).isTiming()) {
+                    this.addEnemyBullet(x.elm, x.elm.getTop() + 20, x.elm.getLeft());
+                    this.addEnemyBullet(x.elm, x.elm.getTop() + 30, x.elm.getLeft());
+                    this.addEnemyBullet(x.elm, x.elm.getTop() + 40, x.elm.getLeft());
                 }
             }).bind(this));
         }
-        this.moveEnemy();
-        this.moveEnemyBullets();
-        this.moveEnemyFunnels();
     },
 
     /**
