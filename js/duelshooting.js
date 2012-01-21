@@ -278,14 +278,18 @@ var DuelShooting = Class.create({
      * @private
      */
     addAudioMethod: function () {
+        if (Prototype.Browser.IE) {
+            Element.addMethods({stop: Prototype.emptyFunction, replay: Prototype.emptyFunction});
+            return;
+        }
         Element.addMethods('audio', {
             stop: function (audio) {
-                if (!('pause' in audio) || Prototype.Browser.IE) return;
+                if (!('pause' in audio)) return;
                 audio.pause();
                 audio.currentTime = 0;
             },
             replay: function (audio) {
-                if (!('pause' in audio) || Prototype.Browser.IE) return;
+                if (!('pause' in audio)) return;
                 audio.pause();
                 audio.currentTime = 0;
                 audio.play();
@@ -591,12 +595,12 @@ var DuelShooting = Class.create({
 
     /**
      *
-     * @param {Element} elm
+     * @param {number} left
      * @private
      */
-    addShipFunnelBullet: function (elm) {
+    addShipFunnelBullet: function (left) {
         var obj = this.getBullet();
-        obj.setPos({top: this.clientHeight - 120, left: elm.getLeft() + 30});
+        obj.setPos({top: this.clientHeight - 120, left: left});
         Element.insert(document.body, obj);
         this.shipBullets.push(obj);
         this.se.get('funnelAttack').replay();
@@ -763,7 +767,7 @@ var DuelShooting = Class.create({
             }
             left = elm.getLeft();
             if (Math.abs(enemyCenterLeft - left) < 30) {
-                this.addShipFunnelBullet(elm);
+                this.addShipFunnelBullet(elm.getLeft());
                 this.shipFunnels[i] = null;
                 this.comeBackShipFunnels.push(elm);
                 continue;
