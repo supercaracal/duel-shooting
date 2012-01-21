@@ -280,12 +280,12 @@ var DuelShooting = Class.create({
     addAudioMethod: function () {
         Element.addMethods('audio', {
             stop: function (audio) {
-                if (!('pause' in audio)) return;
+                if (!('pause' in audio) || Prototype.Browser.IE) return;
                 audio.pause();
                 audio.currentTime = 0;
             },
             replay: function (audio) {
-                if (!('pause' in audio)) return;
+                if (!('pause' in audio) || Prototype.Browser.IE) return;
                 audio.pause();
                 audio.currentTime = 0;
                 audio.play();
