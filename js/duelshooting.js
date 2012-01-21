@@ -56,12 +56,6 @@ var DuelShooting = Class.create({
      *
      * @type {number}
      */
-    timerIdDebug: null,
-
-    /**
-     *
-     * @type {number}
-     */
     timeCountTimerId: null,
 
     /**
@@ -192,6 +186,30 @@ var DuelShooting = Class.create({
 
     /**
      *
+     * @ty@e {Element}
+     */
+    enemyIFieldFunnelLeft: null,
+
+    /**
+     *
+     * @type {Element}
+     */
+    enemyIFieldFunnelRight: null,
+
+    /**
+     *
+     * @type {Element}
+     */
+    enemyIField: null,
+
+    /**
+     *
+     * @type {boolean}
+     */
+    isActiveEnemyIField: null,
+
+    /**
+     *
      * @type {boolean}
      */
     isEnemyMoveRight: null,
@@ -215,6 +233,8 @@ var DuelShooting = Class.create({
         this.createEnemy();
         this.createTimeCounter();
         this.createShip();
+        this.createEnemyIFieldFunnels();
+        this.createEnemyIField();
         this.shipBullets = [];
         this.enemyBullets = [];
         this.shipFunnels = [];
@@ -225,6 +245,7 @@ var DuelShooting = Class.create({
         this.enemyBulletCount = 0;
         this.comeBackShipFunnels = [];
         this.enemyTurn = true;
+        this.isActiveEnemyIField = false;
         Event.observe(window, 'resize', this.redeploy.bindAsEventListener(this));
         this.animateOpening(
              this.TITLE_TEXT,
@@ -287,6 +308,9 @@ var DuelShooting = Class.create({
             getPos: function (div) {
                 return {top: div.getStyle('top').replace('px', '') - 0, left: div.getStyle('left').replace('px', '') - 0};
             },
+            getTransformRotate: function (div) {
+                return (div.getStyle('-webkit-transform') || div.getStyle('-moz-transform')).replace('rotate(', '').replace('deg)', '') - 0;
+            },
             setTop: function (div, px) {
                 div.setStyle({top: px + 'px'});
             },
@@ -296,6 +320,9 @@ var DuelShooting = Class.create({
             setPos: function (div, pxs) {
                 if (pxs['top'] !== undefined) div.setStyle({top: pxs.top + 'px'});
                 if (pxs['left'] !== undefined) div.setStyle({left: pxs.left + 'px'});
+            },
+            setTransformRotate: function (div, value) {
+                div.setStyle({'-webkit-transform': 'rotate(' + value + 'deg)', '-moz-transform': 'rotate(' + value + 'deg)'});
             }
         });
     },
@@ -415,6 +442,28 @@ var DuelShooting = Class.create({
         obj.insert(new Element('div').setStyle({width: '30px', height: '30px', backgroundColor: color, borderRadius: '6px', boxShadow: '0px 0px 10px ' + color, marginLeft: '30px'}));
         obj.insert(new Element('div').setStyle({width: '90px', height: '30px', backgroundColor: color, borderRadius: '6px', boxShadow: '0px 0px 10px ' + color, textAlign: 'center', fontWeight: 800, fontSize: '20px'}).update(this.shipHP));
         this.ship = obj;
+    },
+
+    /**
+     *
+     * @private
+     */
+    createEnemyIFieldFunnels: function () {
+        this.enemyIFieldFunnelLeft = this.getEnemyFunnel();
+        this.enemyIFieldFunnelRight = this.getEnemyFunnel();
+        this.moveEnemyIFieldFunnels();
+        this.enemyIFieldFunnelLeft.setTransformRotate(225);
+        this.enemyIFieldFunnelRight.setTransformRotate(135);
+    },
+
+    /**
+     *
+     * @private
+     */
+    createEnemyIField: function () {
+        var color = '#FFFFFF';
+        this.enemyIField = new Element('div').setStyle({width: '100px', height: '20px', backgroundColor: color, zIndex: this.Z_INDEX_BASE + 11, position: 'fixed', top: '75px', left: '0px', boxShadow: '0px 0px 10px ' + color, borderRadius: '10px', display: 'none'});
+        this.enemyIField.setOpacity(0.5);
     },
 
     /**
@@ -615,6 +664,11 @@ var DuelShooting = Class.create({
             }
             top = elm.getTop();
             left = elm.getLeft();
+            if (this.isActiveEnemyIField && top - 10 < 80 && enemyLeft - 25 < left && left < enemyLeft + 95) {
+                this.shipBullets[i] = null;
+                elm.remove();
+                continue;
+            }
             if ((enemyLeft - 25 < left) && (left <= enemyLeft + 5) && (top - 10 < 30)) {
                 this.shipBullets[i] = null;
                 elm.remove();
@@ -766,7 +820,7 @@ var DuelShooting = Class.create({
         var searchSectorY = 30;
         var isLeft = false;
         var elm, top, left;
-        for (var i = 0, len = this.shipBullets.length; i < len; ++i) {
+        for (var i = 0, len = this.shipBullets.length; !this.isActiveEnemyIField && i < len; ++i) {
             elm = this.shipBullets[i];
             if (!elm) {
                 continue;
@@ -793,6 +847,41 @@ var DuelShooting = Class.create({
         var inc = 10;
         this.addEnemyAfterimage([enemyLeft, enemyLeft + (inc * 3 * sign), enemyLeft + (inc * 6 * sign)]);
         this.se.get('newtype').replay();
+    },
+
+    /**
+     *
+     * @private
+     */
+    moveEnemyIFieldFunnels: function () {
+        this.enemyIFieldFunnelLeft.setPos({top: this.enemy.getTop() + 70, left: this.enemy.getLeft() - 40});
+        this.enemyIFieldFunnelRight.setPos({top: this.enemy.getTop() + 70, left: this.enemy.getLeft() + 100});
+    },
+
+    /**
+     *
+     * @private
+     */
+    moveEnemyIField: function () {
+        this.enemyIField.setLeft(this.enemy.getLeft() - 5);
+    },
+
+    /**
+     *
+     * @private
+     */
+    rotateEnemyIFieldFunnels: function () {
+        if (this.isActiveEnemyIField) {
+            this.enemyIFieldFunnelLeft.setTransformRotate(270);
+            this.enemyIFieldFunnelRight.setTransformRotate(90);
+            return;
+        }
+        var deg = this.enemyIFieldFunnelLeft.getTransformRotate();
+        deg = deg > 360 ? 0 : deg;
+        this.enemyIFieldFunnelLeft.setTransformRotate(++deg);
+        deg = this.enemyIFieldFunnelRight.getTransformRotate();
+        deg = deg < 0 ? 360 : deg;
+        this.enemyIFieldFunnelRight.setTransformRotate(--deg);
     },
 
     /**
@@ -838,6 +927,39 @@ var DuelShooting = Class.create({
             this.se.get('lose').replay();
             return;
         }
+    },
+
+    /**
+     *
+     * Use debug.
+     *
+     * @param {number} num
+     * @private
+     */
+    setShipHP: function (num) {
+        this.shipHP = num;
+        this.ship.down(1).update(num);
+    },
+
+    /**
+     *
+     * Use debug.
+     *
+     * @param {number} num
+     * @private
+     */
+    setEnemyHP: function (num) {
+        this.enemyHP = num;
+        this.enemy.down(0).update(num);
+    },
+
+    /**
+     *
+     * @private
+     */
+    setEnemyIFieldColor: function () {
+        var color = '#' + Math.floor(Math.random() * 100).toColorPart() + Math.floor(Math.random() * 100).toColorPart() + Math.floor(Math.random() * 100).toColorPart();
+        this.enemyIField.setStyle({backgroundColor: color});
     },
 
     /**
@@ -1013,6 +1135,9 @@ var DuelShooting = Class.create({
         Element.insert(document.body, this.enemy);
         Element.insert(document.body, this.ship);
         Element.insert(document.body, this.timeCounter);
+        Element.insert(document.body, this.enemyIFieldFunnelLeft);
+        Element.insert(document.body, this.enemyIFieldFunnelRight);
+        Element.insert(document.body, this.enemyIField);
     },
 
     /**
@@ -1025,6 +1150,8 @@ var DuelShooting = Class.create({
         this.moveComeBackShipFunnels();
         this.battle();
         this.moveEnemy();
+        this.moveEnemyIFieldFunnels();
+        this.moveEnemyIField();
         this.moveEnemyBullets();
         this.moveEnemyFunnels();
     },
@@ -1047,8 +1174,8 @@ var DuelShooting = Class.create({
             if (this.megaCannonHeight % 3 === 0) this.addShipMegaCannonBullet();
             --this.megaCannonHeight;
         }
-        if ((50).isTiming()) {
-            this.enemyBulletCount += Math.floor(Math.random() * 100) % 9;
+        if (!this.isActiveEnemyIField && (50).isTiming()) {
+            this.enemyBulletCount += Math.floor(Math.random() * 100) % 5;
         }
         if (this.enemyBulletCount > 0) {
             this.addEnemyBullet(this.enemy, 60, this.enemy.getLeft() + 30);
@@ -1066,6 +1193,26 @@ var DuelShooting = Class.create({
                 }
             }).bind(this));
         }
+        if ((this.enemyHP > 100 ? 100 : this.enemyHP).isTiming() && (2).isTiming()) {
+            this.isActiveEnemyIField = !this.isActiveEnemyIField;
+            this.isActiveEnemyIField ? this.enemyIField.show() : this.enemyIField.hide();
+        }
+        if (this.isActiveEnemyIField) {
+            this.setEnemyIFieldColor();
+        }
+        this.rotateEnemyIFieldFunnels();
+    },
+
+    /**
+     *
+     * Use debug.
+     *
+     * @private
+     */
+    setupDebugMode: function () {
+        this.setShipHP(100000);
+        this.setEnemyHP(100000);
+        this.addEnemyFunnel();
     },
 
     /**
@@ -1073,11 +1220,22 @@ var DuelShooting = Class.create({
      * @private
      */
     start: function () {
+        if (this.timerId !== null) return;
         this.timerId = window.setInterval(this.moveElem.bind(this), this.INTERVAL_WAIT_MSEC);
         this.timeCountTimerId = window.setInterval((function () {
              ++this.timeCount;
              this.timeCounter.update(this.timeCount);
         }).bind(this), 1000);
+    },
+
+    /**
+     *
+     * Use debug.
+     *
+     * @private
+     */
+    pause: function () {
+        this.timerId === null ? this.start() : this.stop();
     },
 
     /**
@@ -1088,5 +1246,7 @@ var DuelShooting = Class.create({
         this.se.each((function (x) { x.value.stop(); }).bind(this));
         window.clearInterval(this.timerId);
         window.clearInterval(this.timeCountTimerId);
+        this.timerId = null;
+        this.timeCountTimerId = null;
     }
 });
