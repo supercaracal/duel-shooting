@@ -309,7 +309,7 @@ var DuelShooting = Class.create({
                 return {top: div.getStyle('top').replace('px', '') - 0, left: div.getStyle('left').replace('px', '') - 0};
             },
             getTransformRotate: function (div) {
-                return (div.getStyle('-webkit-transform') || div.getStyle('-moz-transform')).replace('rotate(', '').replace('deg)', '') - 0;
+                return (div.getStyle('-webkit-transform') || div.getStyle('-moz-transform') || div.getStyle('-ms-transform') || div.getStyle('transform') || '').replace('rotate(', '').replace('deg)', '') - 0;
             },
             setTop: function (div, px) {
                 div.setStyle({top: px + 'px'});
@@ -322,7 +322,7 @@ var DuelShooting = Class.create({
                 if (pxs['left'] !== undefined) div.setStyle({left: pxs.left + 'px'});
             },
             setTransformRotate: function (div, value) {
-                div.setStyle({'-webkit-transform': 'rotate(' + value + 'deg)', '-moz-transform': 'rotate(' + value + 'deg)'});
+                div.setStyle({webkitTransform: 'rotate(' + value + 'deg)', MozTransform: 'rotate(' + value + 'deg)', msTransform: 'rotate(' + value + 'deg)', transform: 'rotate(' + value + 'deg)'});
             }
         });
     },
