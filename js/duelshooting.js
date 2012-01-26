@@ -224,7 +224,7 @@ var DuelShooting = Class.create({
         this.addAudioMethod();
         this.addDivMethod();
         Number.prototype.isTiming = (function (num) { return Math.floor(Math.random() * 100) % num === 0; }).methodize();
-        this.hasTouchEvent = (function () { return new Element('div', {ontouchstart: 'return;'}).ontouchstart == 'function'; }());
+        this.hasTouchEvent = (function () { return typeof new Element('div', {ontouchstart: 'return;'}).ontouchstart == 'function'; }());
         this.setClientHeight();
         this.setClientWidth();
         this.enemyHP = 100;
