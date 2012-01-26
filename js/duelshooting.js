@@ -977,7 +977,7 @@ var DuelShooting = Class.create({
      */
     setEventListener: function () {
         if (this.hasTouchEvent) {
-            Event.observe(document, 'touchend', this.handlerSmart.bindAsEventListener(this));
+            Event.observe(document, 'touchstart', this.handlerSmart.bindAsEventListener(this));
         } else {
             Event.observe(document, 'keydown', this.handler.bindAsEventListener(this));
             Event.observe(document, 'mousedown', this.handlerMouse.bindAsEventListener(this));
@@ -1035,6 +1035,7 @@ var DuelShooting = Class.create({
      * @param {event} e
      */
     handlerMouse: function (e) {
+        e.stop();
         this.convertToAction(e.pageX, e.pageY);
     },
 
@@ -1044,6 +1045,7 @@ var DuelShooting = Class.create({
      * @param {event} e
      */
     handlerSmart: function (e) {
+        e.stop();
         this.convertToAction(e.touches[0].pageX, e.touches[0].pageY);
     },
 
