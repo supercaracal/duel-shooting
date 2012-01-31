@@ -44,12 +44,6 @@ var DuelShooting = Class.create({
      *
      * @type {number}
      */
-    STEP_DURATION: 10,
-
-    /**
-     *
-     * @type {number}
-     */
     timerId: null,
 
     /**
@@ -279,7 +273,7 @@ var DuelShooting = Class.create({
      */
     addAudioMethod: function () {
         if (Prototype.Browser.IE) {
-            Element.addMethods({stop: Prototype.emptyFunction, replay: Prototype.emptyFunction});
+            Element.addMethods('audio', {stop: Prototype.emptyFunction, replay: Prototype.emptyFunction});
             return;
         }
         Element.addMethods('audio', {
@@ -1004,6 +998,7 @@ var DuelShooting = Class.create({
      * @param {event} e
      */
     handler: function (e) {
+        e.stop();
         var KEY_F = 70;
         var KEY_M = 77;
         switch (e.keyCode) {
