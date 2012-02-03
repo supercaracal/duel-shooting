@@ -256,6 +256,19 @@ var DuelShooting = Class.create({
      * @private
      */
     preLoad: function () {
+        if (Prototype.Browser.WebKit && window.navigator.userAgent.indexOf('Chrome') === -1) {
+            this.se = $H({
+                hit: new Element('div'),
+                attack: new Element('div'),
+                mega: new Element('div'),
+                newtype: new Element('div'),
+                lose: new Element('div'),
+                funnelMove: new Element('div'),
+                funnelAttack: new Element('div')
+            });
+            Element.addMethods('div', {stop: Prototype.emptyFunction, replay: Prototype.emptyFunction});
+            return;
+        }
         this.se = $H({
             hit: new Element('audio', {src: './se/hit.wav'}),
             attack: new Element('audio', {src: './se/attack.wav'}),
