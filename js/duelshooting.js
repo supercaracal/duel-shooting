@@ -256,7 +256,7 @@ var DuelShooting = Class.create({
      * @private
      */
     preLoad: function () {
-        if (Prototype.Browser.WebKit && window.navigator.userAgent.indexOf('Chrome') === -1) {
+        if (Prototype.Browser.WebKit && !Prototype.Browser.MobileSafari && window.navigator.userAgent.indexOf('Chrome') === -1) {
             this.se = $H({
                 hit: new Element('div'),
                 attack: new Element('div'),
@@ -266,7 +266,18 @@ var DuelShooting = Class.create({
                 funnelMove: new Element('div'),
                 funnelAttack: new Element('div')
             });
-            Element.addMethods('div', {stop: Prototype.emptyFunction, replay: Prototype.emptyFunction});
+            return;
+        }
+        if (Prototype.Browser.MobileSafari) {
+            this.se = $H({
+                hit: new Audio('./se/hit.wav'),
+                attack: new Audio('./se/attack.wav'),
+                mega: new Audio('./se/mega.wav'),
+                newtype: new Audio('./se/newtype.wav'),
+                lose: new Audio('./se/lose.wav'),
+                funnelMove: new Audio('./se/funnel1.wav'),
+                funnelAttack: new Audio('./se/funnel2.wav')
+            });
             return;
         }
         this.se = $H({
@@ -285,6 +296,22 @@ var DuelShooting = Class.create({
      * @private
      */
     addAudioMethod: function () {
+        if (Prototype.Browser.WebKit && !Prototype.Browser.MobileSafari && window.navigator.userAgent.indexOf('Chrome') === -1) {
+            Element.addMethods('div', {stop: Prototype.emptyFunction, replay: Prototype.emptyFunction});
+            return;
+        }
+        if (Prototype.Browser.MobileSafari) {
+            Audio.prototype.stop = (function (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }).methodize();
+            Audio.prototype.replay = (function (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+                audio.play();
+            }).methodize();
+            return;
+        }
         if (Prototype.Browser.IE) {
             Element.addMethods('audio', {stop: Prototype.emptyFunction, replay: Prototype.emptyFunction});
             return;
