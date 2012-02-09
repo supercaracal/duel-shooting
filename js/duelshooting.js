@@ -174,6 +174,12 @@ var DuelShooting = Class.create({
 
     /**
      *
+     * @type {boolean}
+     */
+    hasAudioElm: null,
+
+    /**
+     *
      * @type {Object}
      */
     se: null,
@@ -214,11 +220,12 @@ var DuelShooting = Class.create({
      * @constructor
      */
     initialize: function () {
+        Number.prototype.isTiming = (function (num) { return Math.floor(Math.random() * 100) % num === 0; }).methodize();
+        this.hasTouchEvent = (function () { return typeof new Element('div', {ontouchstart: 'return;'}).ontouchstart == 'function'; }());
+        this.hasAudioElm = (function () { return !!(typeof Audio == 'function' && Audio.name == 'HTMLAudioElement' && Audio.prototype.canPlayType && new Audio().canPlayType('audio/mp3') == 'maybe'); }());
         this.preLoad();
         this.addAudioMethod();
         this.addDivMethod();
-        Number.prototype.isTiming = (function (num) { return Math.floor(Math.random() * 100) % num === 0; }).methodize();
-        this.hasTouchEvent = (function () { return typeof new Element('div', {ontouchstart: 'return;'}).ontouchstart == 'function'; }());
         this.setClientHeight();
         this.setClientWidth();
         this.enemyHP = 100;
@@ -256,38 +263,22 @@ var DuelShooting = Class.create({
      * @private
      */
     preLoad: function () {
-        if (Prototype.Browser.WebKit && !Prototype.Browser.MobileSafari && window.navigator.userAgent.indexOf('Chrome') === -1) {
-            this.se = $H({
-                hit: new Element('div'),
-                attack: new Element('div'),
-                mega: new Element('div'),
-                newtype: new Element('div'),
-                lose: new Element('div'),
-                funnelMove: new Element('div'),
-                funnelAttack: new Element('div')
-            });
-            return;
-        }
-        if (Prototype.Browser.MobileSafari) {
-            this.se = $H({
-                hit: new Audio('./se/hit.wav'),
-                attack: new Audio('./se/attack.wav'),
-                mega: new Audio('./se/mega.wav'),
-                newtype: new Audio('./se/newtype.wav'),
-                lose: new Audio('./se/lose.wav'),
-                funnelMove: new Audio('./se/funnel1.wav'),
-                funnelAttack: new Audio('./se/funnel2.wav')
-            });
-            return;
-        }
-        this.se = $H({
-            hit: new Element('audio', {src: './se/hit.wav'}),
-            attack: new Element('audio', {src: './se/attack.wav'}),
-            mega: new Element('audio', {src: './se/mega.wav'}),
-            newtype: new Element('audio', {src: './se/newtype.wav'}),
-            lose: new Element('audio', {src: './se/lose.wav'}),
-            funnelMove: new Element('audio', {src: './se/funnel1.wav'}),
-            funnelAttack: new Element('audio', {src: './se/funnel2.wav'})
+        this.se = $H(this.hasAudioElm ? {
+            hit: new Element('audio', {src: './se/hit.mp3'}),
+            attack: new Element('audio', {src: './se/attack.mp3'}),
+            mega: new Element('audio', {src: './se/mega.mp3'}),
+            newtype: new Element('audio', {src: './se/newtype.mp3'}),
+            lose: new Element('audio', {src: './se/lose.mp3'}),
+            funnelMove: new Element('audio', {src: './se/funnel1.mp3'}),
+            funnelAttack: new Element('audio', {src: './se/funnel2.mp3'})
+        } : {
+            hit: new Element('div'),
+            attack: new Element('div'),
+            mega: new Element('div'),
+            newtype: new Element('div'),
+            lose: new Element('div'),
+            funnelMove: new Element('div'),
+            funnelAttack: new Element('div')
         });
     },
 
@@ -296,39 +287,24 @@ var DuelShooting = Class.create({
      * @private
      */
     addAudioMethod: function () {
-        if (Prototype.Browser.WebKit && !Prototype.Browser.MobileSafari && window.navigator.userAgent.indexOf('Chrome') === -1) {
-            Element.addMethods('div', {stop: Prototype.emptyFunction, replay: Prototype.emptyFunction});
-            return;
+        if (this.hasAudioElm) {
+            Element.addMethods('audio', {
+                stop: function (audio) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                },
+                replay: function (audio) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.play();
+                }
+            });
+        } else {
+            Element.addMethods('div', {
+                stop: function (obj) {},
+                replay: function (obj) {}
+            });
         }
-        if (Prototype.Browser.MobileSafari) {
-            Audio.prototype.stop = (function (audio) {
-                audio.pause();
-                audio.currentTime = 0;
-            }).methodize();
-            Audio.prototype.replay = (function (audio) {
-                audio.pause();
-                audio.currentTime = 0;
-                audio.play();
-            }).methodize();
-            return;
-        }
-        if (Prototype.Browser.IE) {
-            Element.addMethods('audio', {stop: Prototype.emptyFunction, replay: Prototype.emptyFunction});
-            return;
-        }
-        Element.addMethods('audio', {
-            stop: function (audio) {
-                if (!('pause' in audio)) return;
-                audio.pause();
-                audio.currentTime = 0;
-            },
-            replay: function (audio) {
-                if (!('pause' in audio)) return;
-                audio.pause();
-                audio.currentTime = 0;
-                audio.play();
-            }
-        });
     },
 
     /**
