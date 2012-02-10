@@ -288,15 +288,17 @@ var DuelShooting = Class.create({
      */
     addAudioMethod: function () {
         if (this.hasAudioElm && Prototype.Browser.MobileSafari) {
-            Audio.stop = (function (audio) {
-                audio.pause();
-                audio.currentTime = 0;
-            }).methodize();
-            Audio.replay = (function (audio) {
-                audio.pause();
-                audio.currentTime = 0;
-                audio.play();
-            }).methodize();
+            this.se.each(function (x) {
+                x.value.stop = (function (audio) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                }).methodize();
+                x.value.replay = (function (audio) {
+                    audio.pause();
+                    audio.currentTime = 0;
+                    audio.play();
+                }).methodize();
+            });
         } else if (this.hasAudioElm) {
             Element.addMethods('audio', {
                 stop: function (audio) {
