@@ -280,6 +280,9 @@ var DuelShooting = Class.create({
             funnelMove: new Element('div'),
             funnelAttack: new Element('div')
         });
+        if (this.hasAudioElm && Prototype.Browser.MobileSafari) {
+            this.se.each(function (x) { x.value.load(); });
+        }
     },
 
     /**
