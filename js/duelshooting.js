@@ -222,7 +222,7 @@ var DuelShooting = Class.create({
     initialize: function () {
         Number.prototype.isTiming = (function (num) { return Math.floor(Math.random() * 100) % num === 0; }).methodize();
         this.hasTouchEvent = (function () { return typeof new Element('div', {ontouchstart: 'return;'}).ontouchstart == 'function'; }());
-        this.hasAudioElm = (function () { return !!(typeof Audio == 'function' && Audio.name == 'HTMLAudioElement' && Audio.prototype.canPlayType && new Audio().canPlayType('audio/mpeg') == 'maybe'); }());
+        this.hasAudioElm = (function () { return typeof Audio == 'function' && Audio.name == 'HTMLAudioElement' && typeof Audio.prototype.canPlayType == 'function' && new Audio().canPlayType('audio/mpeg') == 'maybe'; }());
         this.preLoad();
         this.addAudioMethod();
         this.addDivMethod();
