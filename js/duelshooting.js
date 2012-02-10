@@ -287,7 +287,17 @@ var DuelShooting = Class.create({
      * @private
      */
     addAudioMethod: function () {
-        if (this.hasAudioElm) {
+        if (this.hasAudioElm && Prototype.Browser.MobileSafari) {
+            Audio.prototype.stop = (function (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+            }).methodize();
+            Audio.prototype.replay = (function (audio) {
+                audio.pause();
+                audio.currentTime = 0;
+                audio.play();
+            }).methodize();
+        } else if (this.hasAudioElm) {
             Element.addMethods('audio', {
                 stop: function (audio) {
                     audio.pause();
