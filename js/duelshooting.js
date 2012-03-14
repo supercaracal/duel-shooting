@@ -418,7 +418,7 @@ var DuelShooting = Class.create({
      * @private
      */
     setClientHeight: function () {
-        var height = (document.documentElement.clientHeight || document.body.clientHeight);
+        var height = document.viewport.getHeight();
         this.clientHeight = height - (height % 10);
     },
 
@@ -427,7 +427,7 @@ var DuelShooting = Class.create({
      * @private
      */
     setClientWidth: function () {
-        var width = (document.documentElement.clientWidth || document.body.clientWidth);
+        var width = document.viewport.getWidth();
         this.clientWidth = width - (width % 10);
     },
 
