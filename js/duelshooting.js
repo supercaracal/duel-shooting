@@ -385,7 +385,7 @@ var DuelShooting = Class.create({
         }).update(text);
         title.setOpacity(0.0);
         modal.insert(title);
-        Element.insert(document.body, modal);
+        $(document.body).insert(modal);
         var dim = title.getDimensions();
         title.setStyle({
             display: 'block',
@@ -581,7 +581,7 @@ var DuelShooting = Class.create({
     addShipBullet: function () {
         var obj = this.getBullet();
         obj.setPos({top: this.clientHeight - 90, left: this.ship.getLeft() + 30});
-        Element.insert(document.body, obj);
+        $(document.body).insert(obj);
         this.shipBullets.push(obj);
     },
 
@@ -595,7 +595,7 @@ var DuelShooting = Class.create({
     addEnemyBullet: function (elm, top, left) {
         var obj = this.getHomingBullet();
         obj.setPos({top: top, left: left});
-        Element.insert(document.body, obj);
+        $(document.body).insert(obj);
         this.enemyBullets.push(obj);
     },
 
@@ -606,7 +606,7 @@ var DuelShooting = Class.create({
     addEnemyFunnel: function () {
         var obj = this.getEnemyFunnel();
         obj.setPos({top: 60, left: this.enemy.getLeft() + 30});
-        Element.insert(document.body, obj);
+        $(document.body).insert(obj);
         this.enemyFunnels.push({
             elm: obj,
             r: 70,
@@ -626,7 +626,7 @@ var DuelShooting = Class.create({
     addShipFunnelBullet: function (left) {
         var obj = this.getBullet();
         obj.setPos({top: this.clientHeight - 120, left: left});
-        Element.insert(document.body, obj);
+        $(document.body).insert(obj);
         this.shipBullets.push(obj);
         this.se.get('funnelAttack').replay();
     },
@@ -642,9 +642,9 @@ var DuelShooting = Class.create({
         objL.setPos({top: this.clientHeight - 90, left: this.ship.getLeft()});
         objM.setPos({top: this.clientHeight - 90, left: this.ship.getLeft() + 30});
         objR.setPos({top: this.clientHeight - 90, left: this.ship.getLeft() + 60});
-        Element.insert(document.body, objL);
-        Element.insert(document.body, objM);
-        Element.insert(document.body, objR);
+        $(document.body).insert(objL);
+        $(document.body).insert(objM);
+        $(document.body).insert(objR);
         this.shipBullets.push(objL);
         this.shipBullets.push(objM);
         this.shipBullets.push(objR);
@@ -657,7 +657,7 @@ var DuelShooting = Class.create({
     addShipFunnel: function () {
         var obj = this.getShipFunnel();
         obj.setPos({top: this.clientHeight - 90, left: this.ship.getLeft() + 30});
-        Element.insert(document.body, obj);
+        $(document.body).insert(obj);
         this.shipFunnels.push(obj);
         this.se.get('funnelMove').replay();
     },
@@ -674,7 +674,7 @@ var DuelShooting = Class.create({
         lefts.each((function (left) {
             var afterimage = this.getEnemyAfterimage();
             afterimage.setPos({top: this.enemy.getTop(), left: left});
-            Element.insert(document.body, afterimage);
+            $(document.body).insert(afterimage);
             (function () { afterimage.remove(); }).delay(0.3);
         }).bind(this));
     },
@@ -1168,13 +1168,13 @@ var DuelShooting = Class.create({
      * @private
      */
     addElems: function () {
-        Element.insert(document.body, this.modal);
-        Element.insert(document.body, this.enemy);
-        Element.insert(document.body, this.ship);
-        Element.insert(document.body, this.timeCounter);
-        Element.insert(document.body, this.enemyIFieldFunnelLeft);
-        Element.insert(document.body, this.enemyIFieldFunnelRight);
-        Element.insert(document.body, this.enemyIField);
+        $(document.body).insert(this.modal);
+        $(document.body).insert(this.enemy);
+        $(document.body).insert(this.ship);
+        $(document.body).insert(this.timeCounter);
+        $(document.body).insert(this.enemyIFieldFunnelLeft);
+        $(document.body).insert(this.enemyIFieldFunnelRight);
+        $(document.body).insert(this.enemyIField);
     },
 
     /**
